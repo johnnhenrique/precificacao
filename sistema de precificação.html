@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Precificação Inteligente</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .control-panel {
+            background: var(--light);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .result-card {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-label {
+            font-weight: 500;
+        }
+        
+        .result-value {
+            font-weight: 600;
+        }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .status-danger {
+            background-color: #fdecea;
+            color: var(--danger);
+        }
+        
+        .status-warning {
+            background-color: #fff8e1;
+            color: var(--warning);
+        }
+        
+        .status-success {
+            background-color: #e8f5e9;
+            color: var(--success);
+        }
+        
+        .status-high {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            height: 400px;
+        }
+        
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+        
+        .product-table th, .product-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .product-table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .product-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .product-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .price-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .indicator-danger {
+            background-color: var(--danger);
+        }
+        
+        .indicator-warning {
+            background-color: var(--warning);
+        }
+        
+        .indicator-success {
+            background-color: var(--success);
+        }
+        
+        .indicator-high {
+            background-color: #1b5e20;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💊 Sistema de Precificação Inteligente</h1>
+        
+        <div class="dashboard">
+            <div class="control-panel">
+                <div class="form-group">
+                    <label for="product-select">Selecione o Ativo:</label>
+                    <select id="product-select" class="form-control">
+                        <option value="">-- Selecione um produto --</option>
+                        <!-- Os produtos serão inseridos via JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="current-price">Seu Preço Atual (R$):</label>
+                    <input type="number" id="current-price" step="0.01" min="0" placeholder="Digite seu preço">
+                </div>
+                
+                <div class="result-card">
+                    <span class="result-label">Custo por Unidade:</span>
+                    <span class="result-value" id="unit-cost">R$ 0,00</span>
+                </div>
+                
+                <div class="result-card">
+                    <span class="result-label">Preço Sugerido:</span>
+                    <span class="result-value" id="suggested-price">R$ 0,00</span>
+                </div>
+                
+                <div class="result-card">
+                    <span class="result-label">Lucro Atual:</span>
+                    <span class="result-value" id="profit-margin">0%</span>
+                </div>
+                
+                <div id="price-status" class="status" style="display: none;">
+                    Status de Precificação
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="price-chart"></canvas>
+            </div>
+        </div>
+        
+        <h2 style="margin-top: 40px;">📊 Lista Completa de Produtos</h2>
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th>COD</th>
+                    <th>Ativo</th>
+                    <th>Apresentação</th>
+                    <th>Custo/Unidade</th>
+                    <th>Preço Sugerido</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="product-table-body">
+                <!-- Os produtos serão inseridos via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Dados completos dos produtos (todos os 121 itens)
+        const products = [
+            { cod: "501", name: "5-OH-Triptofano 10mg/2ml", presentation: "Cx 10 amp.", cost: 3.86, suggested: 7.72 },
+            { cod: "598", name: "Acetil-L-Carnitina 600mg/2ml", presentation: "Cx 10 amp.", cost: 8.49, suggested: 12.00 },
+            { cod: "502", name: "Ácido Alfa Lipóico 10mg/2ml", presentation: "Cx 10 amp.", cost: 4.29, suggested: 8.50 },
+            { cod: "503", name: "Ácido Alfa Lipóico 600mg/20ml", presentation: "Cx 10 fras.", cost: 28.67, suggested: 45.00 },
+            { cod: "599", name: "Ácido Fólico 10mg/2ml", presentation: "Cx 10 amp.", cost: 4.73, suggested: 9.00 },
+            { cod: "505", name: "Ácido Glicólico 20mg/2ml", presentation: "Cx 10 amp.", cost: 3.86, suggested: 7.50 },
+            { cod: "506", name: "Ácido Hialurônico não reticulado 30mg/2ml", presentation: "Cx 5 fras.", cost: 23.99, suggested: 40.00 },
+            { cod: "507", name: "Ácido Hialurônico não reticulado 30mg/2ml", presentation: "Cx 10 fras.", cost: 23.89, suggested: 40.00 },
+            { cod: "508", name: "Ácido Hialurônico não reticulado 40mg/3ml", presentation: "Cx 5 fras.", cost: 47.30, suggested: 70.00 },
+            { cod: "509", name: "Ácido Hialurônico não reticulado 40mg/3ml", presentation: "Cx 10 fras.", cost: 45.89, suggested: 70.00 },
+            { cod: "510", name: "Ácido Hialurônico não reticulado 4mg/2ml", presentation: "Cx 10 amp.", cost: 6.30, suggested: 12.00 },
+            { cod: "511", name: "Ácido Mandélico 20mg + Ác. Kojico 20mg + Ác.Fítico 20mg/ml", presentation: "Cx 10 amp.", cost: 13.91, suggested: 25.00 },
+            { cod: "512", name: "Ácido Tranexâmico 8mg/2ml", presentation: "Cx 10 amp.", cost: 7.39, suggested: 15.00 },
+            { cod: "513", name: "ADN (Ácido Hialurônico não reticulado 10mg + Condroitin 25mg/ml)", presentation: "Cx 10 fras.", cost: 20.00, suggested: 35.00 },
+            { cod: "514", name: "Alfa Arbutin 20mg/ml", presentation: "Cx 10 amp.", cost: 8.38, suggested: 16.00 },
+            { cod: "515", name: "Asiaticosídeo 0,6mg/ml", presentation: "Cx 10 amp.", cost: 6.08, suggested: 12.00 },
+            { cod: "516", name: "BCAA (L-Leucina 10mg + L-Isoleucina 10mg + L-Valina 10mg/ml)", presentation: "Cx 10 amp.", cost: 6.95, suggested: 14.00 },
+            { cod: "517", name: "BCAA (L-Leucina 10mg + L-Isoleucina 10mg + L-Valina 10mg/ml) + HMB 50mg/5ml", presentation: "Cx 10 amp.", cost: 20.00, suggested: 35.00 },
+            { cod: "518", name: "Benzopirona 1mg/2ml", presentation: "Cx 10 amp.", cost: 3.86, suggested: 8.00 },
+            { cod: "519", name: "Biotina (vitamina H ou B7) 10mg/2ml", presentation: "Cx 10 amp.", cost: 4.35, suggested: 9.00 },
+            { cod: "520", name: "Cafeína 120mg/2ml", presentation: "Cx 10 amp.", cost: 3.86, suggested: 8.00 },
+            { cod: "521", name: "Cafeína 50mg/2ml", presentation: "Cx 10 amp.", cost: 3.68, suggested: 7.50 },
+            { cod: "640", name: "Citrulina 100mg/2ml", presentation: "Cx 10 amp.", cost: 5.36, suggested: 10.00 },
+            { cod: "609", name: "Cloreto de Magnésio 400mg/ml", presentation: "Cx 10 amp.", cost: 3.99, suggested: 8.00 },
+            { cod: "523", name: "Coenzima Q10 100mg/1ml", presentation: "Cx 10 amp.", cost: 24.98, suggested: 45.00 },
+            { cod: "610", name: "Coenzima Q10 100mg/1ml", presentation: "Cx 5 amp.", cost: 25.00, suggested: 45.00 },
+            { cod: "524", name: "Colágeno 10mg/ml", presentation: "Cx 10 amp.", cost: 5.90, suggested: 12.00 },
+            { cod: "525", name: "Colina 200mg/2ml", presentation: "Cx 10 amp.", cost: 3.79, suggested: 8.00 },
+            { cod: "526", name: "Condroitin Sulfato 200mg/2ml", presentation: "Cx 10 amp.", cost: 5.69, suggested: 12.00 },
+            { cod: "527", name: "Crisina 100mcg/2ml", presentation: "Cx 10 amp.", cost: 10.38, suggested: 20.00 },
+            { cod: "528", name: "Curcumina 200mcg/2ml", presentation: "Cx 10 amp.", cost: 9.49, suggested: 18.00 },
+            { cod: "529", name: "Desoxicolato de Sódio 50mg/ml", presentation: "Cx 10 amp.", cost: 8.28, suggested: 16.00 },
+            { cod: "530", name: "DMSO 20mg/2ml", presentation: "Cx 10 amp.", cost: 3.43, suggested: 7.00 },
+            { cod: "531", name: "DMAE 140mg/2ml", presentation: "Cx 10 amp.", cost: 10.25, suggested: 20.00 },
+            { cod: "532", name: "DMAE 60mg/2ml", presentation: "Cx 10 amp.", cost: 7.10, suggested: 14.00 },
+            { cod: "533", name: "D-Pantenol (Vitamina B5) 50mg/ml", presentation: "Cx 10 amp.", cost: 4.15, suggested: 9.00 },
+            { cod: "642", name: "D-Ribose 500mg", presentation: "Cx 10 amp.", cost: 8.90, suggested: 16.00 },
+            { cod: "534", name: "Dutasterida 0,1% (1mg)", presentation: "Cx 10 amp.", cost: 14.98, suggested: 28.00 },
+            { cod: "535", name: "Elastina 10mg/ml", presentation: "Cx 10 amp.", cost: 4.80, suggested: 10.00 },
+            { cod: "536", name: "Finasterida 1 mg/2ml", presentation: "Cx 10 amp.", cost: 4.63, suggested: 9.00 },
+            { cod: "538", name: "GABA 25mg/2ml", presentation: "Cx 10 amp.", cost: 7.67, suggested: 15.00 },
+            { cod: "539", name: "GAG (Glicosaminoglicano) 20mg/2ml", presentation: "Cx 10 amp.", cost: 9.08, suggested: 18.00 },
+            { cod: "643", name: "Glutationa 250mg/2ml", presentation: "Cx 10 amp.", cost: 12.87, suggested: 25.00 },
+            { cod: "540", name: "HMB (hidroximetilbutirato) 50mg/2ml", presentation: "Cx 10 amp.", cost: 7.35, suggested: 15.00 },
+            { cod: "541", name: "Inositol 200mg/2ml", presentation: "Cx 10 amp.", cost: 5.52, suggested: 11.00 },
+            { cod: "542", name: "Inositol 200mg + Taurina 200mg/2ml", presentation: "Cx 10 amp.", cost: 6.00, suggested: 12.00 },
+            { cod: "543", name: "Ioimbina 5mg/ml", presentation: "Cx 10 amp.", cost: 4.25, suggested: 9.00 },
+            { cod: "544", name: "L-Fenilalanina 50 mg/2ml", presentation: "Cx 10 amp.", cost: 3.97, suggested: 8.00 },
+            { cod: "545", name: "L-Arginina 1000mg/2ml", presentation: "Cx 10 amp.", cost: 4.39, suggested: 9.00 },
+            { cod: "547", name: "L-Carnitina 600mg/2ml", presentation: "Cx 10 amp.", cost: 7.40, suggested: 15.00 },
+            { cod: "614", name: "L-Glicina 100mg/2ml", presentation: "Cx 10 amp.", cost: 3.99, suggested: 8.00 },
+            { cod: "615", name: "L-Glutamina 150mg/2ml", presentation: "Cx 10 amp.", cost: 4.20, suggested: 9.00 },
+            { cod: "618", name: "L-Lisina 300mg/2ml", presentation: "Cx 10 amp.", cost: 4.40, suggested: 9.00 },
+            { cod: "619", name: "L-Prolina 600mg/2ml", presentation: "Cx 10 amp.", cost: 7.88, suggested: 16.00 },
+            { cod: "548", name: "L-Carnitina 500mg + Cafeina 65mg/5ml", presentation: "Cx 10 amp.", cost: 4.96, suggested: 10.00 },
+            { cod: "549", name: "LipoLess (Vit B12 1mg + Metionina 50mg + Inositol 75mg + Colina75mg)", presentation: "Cx 10 amp.", cost: 9.67, suggested: 18.00 },
+            { cod: "550", name: "L-Metionina 100mg/2ml", presentation: "Cx 10 amp.", cost: 4.39, suggested: 9.00 },
+            { cod: "551", name: "L-Ornitina 150mg/2ml", presentation: "Cx 10 amp.", cost: 5.68, suggested: 12.00 },
+            { cod: "552", name: "L-Taurina 200mg/2ml", presentation: "Cx 10 amp.", cost: 4.00, suggested: 8.00 },
+            { cod: "553", name: "L-Theanina 50mg/2ml", presentation: "Cx 10 amp.", cost: 5.79, suggested: 12.00 },
+            { cod: "554", name: "L-Triptofano 50mg/5ml", presentation: "Cx 10 amp.", cost: 3.86, suggested: 8.00 },
+            { cod: "621", name: "Melatonina 10mg/2ml", presentation: "Cx 10 amp.", cost: 18.00, suggested: 35.00 },
+            { cod: "622", name: "Melatonina 3mg /2ml", presentation: "Cx 10 amp.", cost: 12.80, suggested: 25.00 },
+            { cod: "624", name: "Metilfolato (5-MTHF ou 5-Metiltetrahidrofolato) 3500mcg/1ml", presentation: "Cx 10 amp.", cost: 15.20, suggested: 30.00 },
+            { cod: "555", name: "Minoxidil 10mg/2ml", presentation: "Cx 10 amp.", cost: 5.29, suggested: 11.00 },
+            { cod: "556", name: "Morusil 2%", presentation: "Cx 10 amp.", cost: 20.00, suggested: 35.00 },
+            { cod: "645", name: "MSM 15% AMP 10ml", presentation: "Cx 5 amp.", cost: 17.85, suggested: 30.00 },
+            { cod: "625", name: "N-Acetil Cisteína 300mg/2ml", presentation: "Cx 10 amp.", cost: 4.94, suggested: 10.00 },
+            { cod: "626", name: "NADH 50mg pó liofilizado", presentation: "Cx 4 fras.", cost: 49.00, suggested: 80.00 },
+            { cod: "557", name: "Pentoxifilina 40mg/2ml", presentation: "Cx 10 amp.", cost: 6.50, suggested: 13.00 },
+            { cod: "558", name: "Picolinato de Cromo 100mcg/2ml", presentation: "Cx 10 amp.", cost: 4.39, suggested: 9.00 },
+            { cod: "559", name: "Pill Food (L-Metionina 25mg + L-Taurina 50mg + L-Prolina 10mg + Biotina 10mg + D-Pantenol 10mg + Vit B2 5mg + Vit B3 10mg + Vit B6 10mg/2ml)", presentation: "Cx 10 amp.", cost: 4.99, suggested: 10.00 },
+            { cod: "628", name: "Pill Food (L - Metionina 62,5mg + L Taurina 125mg + L Prolina 25mg + Biotina 25mg + D-Pantenol 25mg + Vit.B2 12,5mg + Vit. B3 25mg + Vit.B6 25mg + Lisina 20mg/5ml)", presentation: "Cx 10 amp.", cost: 11.03, suggested: 20.00 },
+            { cod: "629", name: "Piracetam 500mg", presentation: "Cx 10 amp.", cost: 7.60, suggested: 15.00 },
+            { cod: "560", name: "Pool de Oligominerais (Silício + Cobre + Zinco + Magnésio + Cromo) 50mcg/2ml", presentation: "Cx 10 amp.", cost: 5.85, suggested: 12.00 },
+            { cod: "561", name: "Piruvato de Sódio 20mg/2ml", presentation: "Cx 10 amp.", cost: 7.99, suggested: 16.00 },
+            { cod: "562", name: "PQQ (Pirroloquinolina Quinona) 5mg/2ml", presentation: "Cx 10 amp.", cost: 11.93, suggested: 22.00 },
+            { cod: "563", name: "Resveratrol 5mg/2ml", presentation: "Cx 10 amp.", cost: 7.94, suggested: 16.00 },
+            { cod: "630", name: "SAMe (S-Adenosilmetionina) 200mg/2ml", presentation: "Cx 10 amp.", cost: 24.00, suggested: 45.00 },
+            { cod: "631", name: "Selênio 80mcg/ml", presentation: "Cx 10 amp.", cost: 3.68, suggested: 8.00 },
+            { cod: "657", name: "Sulfato de Magnésio 10%", presentation: "Cx 10 amp.", cost: 3.57, suggested: 7.00 },
+            { cod: "632", name: "Sulfato de Manganês 20mg/2ml", presentation: "Cx 10 amp.", cost: 3.47, suggested: 7.00 },
+            { cod: "564", name: "Silício 10mg/2ml", presentation: "Cx 10 amp.", cost: 4.85, suggested: 10.00 },
+            { cod: "565", name: "Sulfato de Cobre 500mcg/2ml", presentation: "Cx 10 amp.", cost: 3.30, suggested: 7.00 },
+            { cod: "566", name: "Sulfato de Magnésio 200mg/2ml", presentation: "Cx 10 amp.", cost: 3.64, suggested: 8.00 },
+            { cod: "568", name: "Sulfato de Zinco 20mg/2ml", presentation: "Cx 10 amp.", cost: 3.50, suggested: 7.00 },
+            { cod: "569", name: "Sulfato de Zinco 20mg + Sulfato de Magnésio 200mg/2ml", presentation: "Cx 10 amp.", cost: 4.25, suggested: 9.00 },
+            { cod: "570", name: "Teacrina 50mg/2ml", presentation: "Cx 10 amp.", cost: 12.58, suggested: 22.00 },
+            { cod: "633", name: "Timomodulina 50mg/2ml", presentation: "Cx 10 amp.", cost: 3.59, suggested: 7.00 },
+            { cod: "600", name: "ADEK² 100 20.000UI+100.000UI+10UI+1300mcg/2ml", presentation: "Cx 5 amp.", cost: 52.00, suggested: 90.00 },
+            { cod: "601", name: "ADEK² 100 20.000UI+100.000UI+10UI+1300mcg/2ml", presentation: "Cx 10 amp.", cost: 47.00, suggested: 85.00 },
+            { cod: "602", name: "ADEK² 600 20.000UI+600.000UI+10UI+1300mcg/2ml", presentation: "Cx 5 amp.", cost: 58.00, suggested: 100.00 },
+            { cod: "603", name: "ADEK² 600 20.000UI+600.000UI+10UI+1300mcg/2ml", presentation: "Cx 10 amp.", cost: 58.00, suggested: 100.00 },
+            { cod: "572", name: "Biotina (vitamina H ou B7) 10mg/2ml", presentation: "Cx 10 amp.", cost: 4.40, suggested: 9.00 },
+            { cod: "573", name: "Complexo B (c/ B1)*B1+B2+B3+B5+B6 5mg+1,25mg+15mg+3mg+1,25mg/1ml", presentation: "Cx 10 amp.", cost: 5.46, suggested: 11.00 },
+            { cod: "574", name: "Complexo B (s/ B1)*B2+B3+B5+B6 10mg+10mg+50mg+10mg/2ml", presentation: "Cx 10 amp.", cost: 3.97, suggested: 8.00 },
+            { cod: "649", name: "Trio Metilador (Vit B6 10mg + Metilfolato 2500mcg + Metilcobalamina 2600mcg/2ml)", presentation: "Cx 10 amp.", cost: 34.20, suggested: 60.00 },
+            { cod: "575", name: "Vitamina B12 (Cianocobalamina ) 2500mcg/1ml", presentation: "Cx 10 amp.", cost: 5.73, suggested: 12.00 },
+            { cod: "576", name: "Vitamina B12 (Metilcobalamina) 2500mcg/ml", presentation: "Cx 10 amp.", cost: 21.50, suggested: 40.00 },
+            { cod: "623", name: "Vitamina B12 (Metilcobalamina) 5000mcg/ml", presentation: "Cx 10 amp.", cost: 35.00, suggested: 60.00 },
+            { cod: "577", name: "Vitamina B5 (D Pantenol) 50mg/ml", presentation: "Cx 10 amp.", cost: 4.19, suggested: 9.00 },
+            { cod: "578", name: "Vitamina B6 (Piridoxina) 50mg/2ml", presentation: "Cx 10 amp.", cost: 3.53, suggested: 8.00 },
+            { cod: "580", name: "Vitamina C 20%/2ml", presentation: "Cx 10 amp.", cost: 4.28, suggested: 9.00 },
+            { cod: "635", name: "Vitamina C (Ácido Ascórbico) 1,2g /5ml", presentation: "Cx 10 amp.", cost: 4.90, suggested: 10.00 },
+            { cod: "658", name: "Vitamina D3 (colecalciferol) 10.000 UI/1ml", presentation: "Cx 5 amp.", cost: 10.08, suggested: 20.00 },
+            { cod: "636", name: "Vitamina D3 (colecalciferol) 100.000 UI / 1ml", presentation: "Cx 5 amp.", cost: 13.65, suggested: 25.00 },
+            { cod: "637", name: "Vitamina D3 (colecalciferol) 600.000 UI / 1ml", presentation: "Cx 5 amp.", cost: 19.95, suggested: 35.00 },
+            { cod: "638", name: "Vitamina K2 MK7 1300mcg/1ml", presentation: "Cx 10 amp.", cost: 24.50, suggested: 45.00 },
+            { cod: "586", name: "Vitamina K2 MK7 + Vitamina D3 1300mcg+ 600.000 UI/1ml", presentation: "Cx 10 amp.", cost: 25.98, suggested: 45.00 },
+            { cod: "587", name: "Glicose 75%/3ml", presentation: "Cx 10 amp.", cost: 3.39, suggested: 7.00 },
+            { cod: "589", name: "Lidocaína 2%/10ml", presentation: "Cx 10 fras.", cost: 3.99, suggested: 8.00 },
+            { cod: "590", name: "Lidocaína 40mg/2ml", presentation: "Cx 10 amp.", cost: 4.00, suggested: 8.00 },
+            { cod: "591", name: "Procaína 40mg/2ml", presentation: "Cx 10 amp.", cost: 3.86, suggested: 8.00 },
+            { cod: "593", name: "Procaína 200mg/10ml", presentation: "Cx 10 fras.", cost: 9.00, suggested: 16.00 },
+            { cod: "594", name: "Nanofatores (IGF + EGF + Copper Peptídio + DMSO) 20mg/2ml", presentation: "Cx 10 amp.", cost: 5.95, suggested: 12.00 },
+            { cod: "595", name: "Nanofatores (TGFB3 + IDP2 + IGF) 20mg/2ml", presentation: "Cx 10 amp.", cost: 5.95, suggested: 12.00 },
+            { cod: "596", name: "Nanofator TGP2 20mg/2ml", presentation: "Cx 10 amp.", cost: 5.84, suggested: 12.00 },
+            { cod: "597", name: "Nanofator Tripeptídeo 41 24mg/2ml", presentation: "Cx 10 amp.", cost: 16.65, suggested: 30.00 }
+        ];
+
+        // Preencher dropdown de seleção
+        const productSelect = document.getElementById('product-select');
+        products.forEach(product => {
+            const option = document.createElement('option');
+            option.value = product.cod;
+            option.textContent = `${product.cod} - ${product.name} (${product.presentation})`;
+            productSelect.appendChild(option);
+        });
+
+        // Preencher tabela de produtos
+        const tableBody = document.getElementById('product-table-body');
+        products.forEach(product => {
+            const row = document.createElement('tr');
+            
+            const getPriceStatus = (suggested, cost) => {
+                const ratio = suggested / cost;
+                if (ratio < 1) return { text: "Abaixo do Custo", class: "danger", indicator: "indicator-danger" };
+                if (ratio < 1.3) return { text: "Baixa", class: "warning", indicator: "indicator-warning" };
+                if (ratio < 1.7) return { text: "Ideal", class: "success", indicator: "indicator-success" };
+                return { text: "Alta", class: "high", indicator: "indicator-high" };
+            };
+            
+            const status = getPriceStatus(product.suggested, product.cost);
+            
+            row.innerHTML = `
+                <td>${product.cod}</td>
+                <td>${product.name}</td>
+                <td>${product.presentation}</td>
+                <td>R$ ${product.cost.toFixed(2)}</td>
+                <td>R$ ${product.suggested.toFixed(2)}</td>
+                <td><span class="price-indicator ${status.indicator}"></span>${status.text}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Configurar gráfico
+        const ctx = document.getElementById('price-chart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Custo', 'Sugerido', 'Seu Preço'],
+                datasets: [{
+                    label: 'Valores (R$)',
+                    data: [0, 0, 0],
+                    backgroundColor: [
+                        'rgba(231, 76, 60, 0.7)',
+                        'rgba(39, 174, 96, 0.7)',
+                        'rgba(52, 152, 219, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(231, 76, 60, 1)',
+                        'rgba(39, 174, 96, 1)',
+                        'rgba(52, 152, 219, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Atualizar dados quando produto for selecionado
+        productSelect.addEventListener('change', function() {
+            const selectedCod = this.value;
+            const product = products.find(p => p.cod === selectedCod);
+            
+            if (product) {
+                document.getElementById('unit-cost').textContent = `R$ ${product.cost.toFixed(2)}`;
+                document.getElementById('suggested-price').textContent = `R$ ${product.suggested.toFixed(2)}`;
+                
+                // Atualizar gráfico
+                chart.data.datasets[0].data = [product.cost, product.suggested, 0];
+                chart.update();
+                
+                // Mostrar campo de preço
+                document.getElementById('current-price').value = '';
+                document.getElementById('price-status').style.display = 'none';
+            }
+        });
+
+        // Calcular lucro quando preço for inserido
+        document.getElementById('current-price').addEventListener('input', function() {
+            const currentPrice = parseFloat(this.value);
+            const selectedCod = productSelect.value;
+            
+            if (selectedCod && !isNaN(currentPrice)) {
+                const product = products.find(p => p.cod === selectedCod);
+                const profit = ((currentPrice - product.cost) / product.cost) * 100;
+                
+                document.getElementById('profit-margin').textContent = `${profit.toFixed(2)}%`;
+                
+                // Atualizar gráfico
+                chart.data.datasets[0].data = [product.cost, product.suggested, currentPrice];
+                chart.update();
+                
+                // Determinar status
+                const statusElement = document.getElementById('price-status');
+                statusElement.style.display = 'block';
+                
+                if (currentPrice < product.cost) {
+                    statusElement.textContent = "ABAIXO DO CUSTO";
+                    statusElement.className = "status status-danger";
+                } else if (currentPrice < product.suggested * 0.9) {
+                    statusElement.textContent = "PRECIFICAÇÃO BAIXA";
+                    statusElement.className = "status status-warning";
+                } else if (currentPrice < product.suggested * 1.1) {
+                    statusElement.textContent = "PRECIFICAÇÃO IDEAL";
+                    statusElement.className = "status status-success";
+                } else {
+                    statusElement.textContent = "PRECIFICAÇÃO ALTA";
+                    statusElement.className = "status status-high";
+                }
+            }
+        });
+    </script>
+</body>
+</html>
